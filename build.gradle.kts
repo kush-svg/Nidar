@@ -7,14 +7,17 @@ plugins {
 group = "com.example"
 version = "0.0.1-SNAPSHOT"
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
-
 repositories {
     mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType<JavaCompile> {
+    options.release.set(17)
 }
 
 dependencies {
