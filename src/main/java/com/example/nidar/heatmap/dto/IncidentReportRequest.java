@@ -1,0 +1,11 @@
+package com.example.nidar.heatmap.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record IncidentReportRequest(
+    @NotNull  Double  latitude,
+    @NotNull  Double  longitude,
+    @NotBlank String  incidentType,
+              Double  trustScore
+) {}
