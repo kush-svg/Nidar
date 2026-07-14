@@ -18,19 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SmsService {
 
-    private final RestTemplate restTemplate;
-
-    // ✅ Default values added → prevents app crash
-    @Value("${msg91.auth-key:dummy_key}")
-    private String authKey;
-
-    @Value("${msg91.sender-id:sender_id}")
-    private String senderId;
-
-    @Value("${msg91.template-id:123456}")
-    private String templateId;
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final org.springframework.core.env.Environment env;
 
     public void send(String phoneNumber, String message) {
+        String authKey = env.getProperty("msg91.auth-key", "dummy_key");
+        String senderId = env.getProperty("msg91.sender-id", "sender_id");
+        String templateId = env.getProperty("msg91.template-id", "123456");
 
         // 🔥 DEV MODE (recommended)
         if (authKey.equals("dummy_key")) {
