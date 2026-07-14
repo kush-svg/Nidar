@@ -1,5 +1,4 @@
--- V1__create_users.sql
-CREATE EXTENSION IF NOT EXISTS postgis;
+
 
 CREATE TABLE users (
     id              VARCHAR(36)  PRIMARY KEY,
