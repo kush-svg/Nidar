@@ -13,10 +13,10 @@ import java.net.URI;
 @Configuration
 public class VaultConfig {
 
-    @Value("${vault.uri}")
+    @Value("${vault.uri:http://localhost:8200}")
     private String vaultUri;
 
-    @Value("${vault.token}")
+    @Value("${vault.token:nidar-vault-token}")
     private String vaultToken;
 
     @Bean

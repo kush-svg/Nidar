@@ -50,7 +50,7 @@ public class LocationSnapshotService {
     private String getLatestSnapshotHash(String sosSessionId) {
         return snapshotRepository
             .findTopBySosSessionIdOrderByCapturedAtDesc(sosSessionId)
-            .map(LocationSnapshot::getChainHash)
+            .map(s -> s.getChainHash())
             .orElse("GENESIS");
     }
 

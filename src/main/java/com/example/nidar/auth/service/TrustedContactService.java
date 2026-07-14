@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.nidar.auth.model.TrustedContact;
-import com.example.nidar.auth.model.User;
 import com.example.nidar.auth.repository.TrustedContactRepository;
 import com.example.nidar.auth.repository.UserRepository;
 import com.example.nidar.auth.dto.TrustedContactRequest;
@@ -45,7 +44,7 @@ public class TrustedContactService {
         // Check if contact is a Nidar user — get their FCM token
         String fcmToken = userRepository
             .findByPhoneNumber("91" + request.phoneNumber())
-            .map(User::getFcmToken)
+            .map(u -> u.getFcmToken())
             .orElse(null);
 
         TrustedContact contact = TrustedContact.builder()

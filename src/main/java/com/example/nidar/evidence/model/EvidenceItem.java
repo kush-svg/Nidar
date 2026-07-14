@@ -1,5 +1,6 @@
 package com.example.nidar.evidence.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -32,12 +33,17 @@ public class EvidenceItem {
     private CaptureMode captureMode;    // AUTO (SOS) or MANUAL
 
     // Storage
-    private String minioObjectKey;      // path inside MinIO bucket
+    private String minioObjectKey;      // path inside GCS bucket
     private Long   fileSizeBytes;
 
     // Integrity
+    @Column(name = "sha256_hash")
     private String sha256Hash;          // computed before encryption
+
+    @Column(name = "previous_hash")
     private String previousHash;        // hash of previous item — chain link
+
+    @Column(name = "chain_hash")
     private String chainHash;           // hash(previousHash + sha256Hash)
 
     // Metadata — the Section 65B data

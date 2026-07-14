@@ -14,6 +14,7 @@ import com.example.nidar.heatmap.model.IncidentType;
 import com.example.nidar.heatmap.repository.IncidentRepository;
 import com.example.nidar.heatmap.dto.IncidentReportRequest;
 import com.example.nidar.common.util.H3SnapUtil;
+import com.example.nidar.common.messaging.KafkaMessagingService;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class IncidentService {
     private final H3SnapUtil         h3SnapUtil;
     private final HeatmapCacheService cacheService;
     private final TrustScoreService   trustScoreService;
+    private final KafkaMessagingService kafkaMessagingService;
 
 
 
@@ -69,6 +71,11 @@ public class IncidentService {
 
         incidentRepository.save(incident);
         cacheService.invalidateArea(h3Index);
+
+        // Publish to global Pub/Sub for real-time aggregation/analytics
+        kafkaMessagingService.publishLocationIncident(
+            h3Index, request.incidentType(), request.latitude(), request.longitude()
+        );
 
         log.info("Incident reported by {} (trust: {}) at h3={}",
             userId, trustScore, h3Index);

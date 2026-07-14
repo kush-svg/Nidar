@@ -57,7 +57,7 @@ public class HomeService {
 
         // Average score across clusters in the area
         double avgScore = clusters.stream()
-            .mapToDouble(WeightedClusterDto::dangerScore)
+            .mapToDouble(c -> c.dangerScore())
             .average()
             .orElse(0.0);
 
@@ -76,7 +76,7 @@ public class HomeService {
                                        extractLng(p.getH3Index())),
                 p.getH3Index()
             ))
-            .sorted(Comparator.comparingDouble(NearbyProtectorDto::distanceKm))
+            .sorted(Comparator.comparingDouble(p2 -> p2.distanceKm()))
             .limit(5)
             .toList();
 

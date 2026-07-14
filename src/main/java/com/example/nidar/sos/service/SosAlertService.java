@@ -15,6 +15,7 @@ import com.example.nidar.auth.repository.TrustedContactRepository;
 import com.example.nidar.auth.repository.UserRepository;
 
 import com.example.nidar.common.util.H3SnapUtil;
+import com.example.nidar.common.messaging.KafkaMessagingService;
 
 @Service
 @RequiredArgsConstructor
@@ -25,22 +26,23 @@ public class SosAlertService {
     private final FcmService               fcmService;
     private final SmsService               smsService;
     private final H3SnapUtil               h3SnapUtil;
+    private final KafkaMessagingService    kafkaMessagingService;
 
-    // ── Step B: Tier 1 — Trusted contacts ────────────────────────────────────
-    @Async("sosTaskExecutor")   // named thread pool — see config below
+    @Async("sosTaskExecutor")   
     public void alertTrustedContacts(String userId, String sessionId,
                                      double lat, double lng) {
+        // Publish to global Pub/Sub
+        kafkaMessagingService.publishSosAlert(sessionId, userId, lat, lng);
+
         List<TrustedContact> contacts = contactRepository.findByUserId(userId);
         if (contacts.isEmpty()) return;
 
         String trackingUrl = "https://nidar.app/sos/" + sessionId;
 
-        // Get the user's name for the SMS message
         String userName = userRepository.findNameById(userId);
 
         for (TrustedContact contact : contacts) {
 
-            // Action 1: FCM — wakes phone even in Doze mode
             if (contact.getFcmToken() != null) {
                 fcmService.sendHighPriority(
                     contact.getFcmToken(),

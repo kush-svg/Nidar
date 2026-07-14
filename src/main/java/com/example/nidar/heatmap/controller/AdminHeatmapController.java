@@ -3,6 +3,7 @@ package com.example.nidar.heatmap.controller;
 import com.example.nidar.heatmap.service.HeatmapCacheService;
 import com.example.nidar.heatmap.service.NcrbDataService;
 import com.example.nidar.heatmap.service.NcrbExcelParser;
+import com.example.nidar.heatmap.service.NcrbCsvParser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ public class AdminHeatmapController {
 
     private final NcrbDataService    ncrbDataService;
     private final NcrbExcelParser    ncrbExcelParser;
+    private final NcrbCsvParser      ncrbCsvParser;
     private final HeatmapCacheService cacheService;
 
     // Trigger manual NCRB sync
@@ -44,7 +46,23 @@ public class AdminHeatmapController {
         cacheService.invalidateAll();
 
         return ResponseEntity.ok(
-            "Ingested " + records.size() + " NCRB records"
+            "Ingested " + records.size() + " NCRB records from Excel"
+        );
+    }
+
+    // Upload custom NCRB CSV file
+    @PostMapping("/upload-ncrb-csv")
+    public ResponseEntity<String> uploadNcrbCsv(
+        @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        List<NcrbDataService.NcrbRecord> records =
+            ncrbCsvParser.parseCsv(file.getInputStream());
+
+        ncrbDataService.ingestParsedRecords(records);
+        cacheService.invalidateAll();
+
+        return ResponseEntity.ok(
+            "Ingested " + records.size() + " NCRB records from CSV"
         );
     }
 

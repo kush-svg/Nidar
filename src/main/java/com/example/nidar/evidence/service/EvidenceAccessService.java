@@ -22,7 +22,7 @@ import com.example.nidar.evidence.repository.EvidenceRepository;
 public class EvidenceAccessService {
 
     private final EvidenceRepository   evidenceRepository;
-    private final MinioService         minioService;
+    private final MinioStorageService  minioStorageService;
     private final EvidenceAuditService auditService;
     private final JwtService           jwtService;
 
@@ -61,7 +61,7 @@ public void validateVaultToken(String userId, String vaultToken) {
         // Ownership check — no cross-user access ever
         validateVaultToken(item.getUserId(), vaultToken);
 
-        String url = minioService.generatePresignedUrl(item.getMinioObjectKey());
+        String url = minioStorageService.generatePresignedUrl(item.getMinioObjectKey());
 
         // Every download is logged — court can see full access history
         auditService.log(item.getId(), item.getUserId(),
@@ -90,7 +90,7 @@ public void validateVaultToken(String userId, String vaultToken) {
         } else if ("DELETE".equalsIgnoreCase(decision)) {
             item.setStatus(EvidenceStatus.DELETED);
             evidenceRepository.save(item);
-            minioService.delete(item.getMinioObjectKey());   // wipe from storage
+            minioStorageService.delete(item.getMinioObjectKey());   // wipe from storage
             auditService.log(item, "DELETED");
 
         } else {
@@ -109,7 +109,7 @@ public void validateVaultToken(String userId, String vaultToken) {
         for (EvidenceItem item : expired) {
             item.setStatus(EvidenceStatus.DELETED);
             evidenceRepository.save(item);
-            minioService.delete(item.getMinioObjectKey());
+            minioStorageService.delete(item.getMinioObjectKey());
             auditService.log(item, "AUTO_EXPIRED");
             log.info("Auto-expired pending evidence item: {}", item.getId());
         }

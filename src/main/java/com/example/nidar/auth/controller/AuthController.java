@@ -25,11 +25,11 @@ import com.example.nidar.auth.model.User;
 @Slf4j
 public class AuthController {
 
-    private final OtpService  otpService;
-    private final JwtService  jwtService;
-    private final UserService userService;   // handles user creation/lookup
+    private final OtpService      otpService;
+    private final JwtService      jwtService;
+    private final UserService     userService;
 
-    // Step 1 — request OTP
+    // Step 1 — request OTP (Legacy/Reference)
     @PostMapping("/otp/request")
     public ResponseEntity<String> requestOtp(
         @Valid @RequestBody OtpRequestDto request
@@ -38,7 +38,8 @@ public class AuthController {
         return ResponseEntity.ok("OTP sent");
     }
 
-    // Step 2 — verify OTP, get tokens
+
+    // Step 2 (Legacy) — verify OTP, get tokens
     @PostMapping("/otp/verify")
     public ResponseEntity<AuthResponseDto> verifyOtp(
         @Valid @RequestBody OtpVerifyDto request

@@ -1,70 +1,62 @@
 package com.example.nidar.config;
 
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.example.nidar.auth.filter.JwtAuthFilter;
-
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
+    // jwtSecret removed, moved to JwtService
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .httpBasic(basic -> basic.disable())
-            .formLogin(form -> form.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .exceptionHandling(ex -> ex
-                // Return 401 (not 403) when no/invalid token is provided
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
             )
             .authorizeHttpRequests(auth -> auth
-                // Allow CORS preflight requests globally
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/").permitAll()
-                // Public — no token needed (OTP, vault setup/unlock, token refresh)
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 
-                // Protected — valid app JWT required
                 .requestMatchers("/api/v1/sos/**").authenticated()
                 .requestMatchers("/api/v1/heatmap/**").authenticated()
                 .requestMatchers("/api/v1/evidence/**").authenticated()
 
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(org.springframework.security.config.Customizer.withDefaults())
+            )
             .build();
     }
+
+    // Custom JwtEncoder and JwtDecoder beans removed to allow Spring Boot to auto-configure Clerk JWT verification.
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

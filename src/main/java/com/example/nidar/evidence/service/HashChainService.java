@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import com.example.nidar.evidence.model.EvidenceItem;
 import com.example.nidar.evidence.repository.EvidenceRepository;
 
 @Service
@@ -23,7 +22,7 @@ public class HashChainService {
     public String getLatestHash(String userId) {
         return evidenceRepository
             .findTopByUserIdOrderByUploadedAtDesc(userId)
-            .map(EvidenceItem::getChainHash)
+            .map(e -> e.getChainHash())
             .orElse("GENESIS");   // first item in chain has no predecessor
     }
 

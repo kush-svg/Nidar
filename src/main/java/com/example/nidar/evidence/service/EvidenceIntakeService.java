@@ -39,7 +39,7 @@ import com.example.nidar.evidence.repository.EvidenceRepository;
 @Slf4j
 public class EvidenceIntakeService {
 
-    private final MinioService         minioService;
+    private final MinioStorageService  minioStorageService;
     private final HashChainService     hashChainService;
     private final EvidenceAuditService auditService;
     private final EvidenceRepository   evidenceRepository;
@@ -69,8 +69,8 @@ public class EvidenceIntakeService {
         // ── 3. Encrypt with AES-256-GCM ──────────────────────────────────────
         byte[] encrypted = encryptAes256Gcm(fileBytes, meta.userId());
 
-        // ── 4. Upload encrypted bytes to MinIO ───────────────────────────────
-        String objectKey = minioService.upload(
+        // ── 4. Upload encrypted bytes to MinIO ─────────────────────────────────
+        String objectKey = minioStorageService.upload(
             meta.userId(), encrypted, file.getContentType()
         );
 
@@ -147,7 +147,7 @@ public class EvidenceIntakeService {
         byte[] encryptedData = cipher.doFinal(plaintext);
 
         // Prepend IV to the ciphertext — IV is needed for decryption
-        // Format stored in MinIO: [12 bytes IV][encrypted data + 16 byte auth tag]
+        // Format stored in GCS: [12 bytes IV][encrypted data + 16 byte auth tag]
         byte[] result = new byte[GCM_IV_LENGTH + encryptedData.length];
         System.arraycopy(iv,            0, result, 0,              GCM_IV_LENGTH);
         System.arraycopy(encryptedData, 0, result, GCM_IV_LENGTH,  encryptedData.length);
